@@ -34,6 +34,7 @@ public class CppSensorPlugin extends SonarPlugin {
     l.add(CppLanguage.class);
     l.add(CppSensorQualityProfile.class);
     l.add(CppProjectSensor.class);
+    l.add(CppCpdMapping.class);
 
     return l;
   }
