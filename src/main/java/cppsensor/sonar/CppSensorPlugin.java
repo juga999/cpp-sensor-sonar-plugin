@@ -32,6 +32,8 @@ public class CppSensorPlugin extends SonarPlugin {
     List<Object> l = new ArrayList<>();
 
     l.add(CppLanguage.class);
+    l.add(CppSensorQualityProfile.class);
+    l.add(CppProjectSensor.class);
 
     return l;
   }
