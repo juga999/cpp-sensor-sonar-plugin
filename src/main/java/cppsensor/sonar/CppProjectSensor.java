@@ -40,6 +40,7 @@ public class CppProjectSensor implements Sensor {
   public CppProjectSensor(FileSystem fs, ResourcePerspectives perspectives) {
     this.fs = fs;
     this.perspectives = perspectives;
+    highlighter.setEncoding(fs.encoding().name());
   }
 
   @Override

@@ -41,6 +41,10 @@ public class CppHighlighter implements ICppTokensConsumer {
 
   private Highlightable.HighlightingBuilder builder;
 
+  public void setEncoding(String encoding) {
+    tokenizer.setEncoding(encoding);
+  }
+
   public void highlight(InputFile f, Highlightable highlightable) {
     if (f == null || highlightable == null ) {
       return;
