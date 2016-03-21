@@ -19,15 +19,12 @@
 
 package cppsensor.sonar;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import org.eclipse.cdt.core.parser.IToken;
 import org.sonar.api.batch.AbstractCpdMapping;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.resources.Language;
-import org.sonar.api.resources.Resource;
 
 import cppsensor.core.tokenizer.CppTokenizer;
 import cppsensor.core.tokenizer.ICppTokensConsumer;
@@ -63,11 +60,6 @@ public class CppCpdMapping extends AbstractCpdMapping implements ICppTokensConsu
   @Override
   public Language getLanguage() {
     return new CppLanguage();
-  }
-
-  @Override
-  public Resource createResource(File file, List<File> sourceDirs) {
-    return null;
   }
 
   @Override
