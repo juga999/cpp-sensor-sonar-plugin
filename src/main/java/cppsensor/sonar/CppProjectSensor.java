@@ -19,6 +19,9 @@
 
 package cppsensor.sonar;
 
+import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.Sensor;
 import org.sonar.api.batch.SensorContext;
 import org.sonar.api.batch.fs.FilePredicate;
@@ -26,21 +29,35 @@ import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.component.ResourcePerspectives;
+import org.sonar.api.config.Settings;
 import org.sonar.api.resources.Project;
 import org.sonar.api.source.Highlightable;
+import org.sonar.api.source.Symbolizable;
+
+import cppsensor.core.parser.CppIndexedParser;
+import cppsensor.core.parser.CppParserInfoProvider;
 
 public class CppProjectSensor implements Sensor {
+
+  private static final Logger log = LoggerFactory.getLogger("CppProjectSensor");
+
+  private final Settings settings;
 
   private final FileSystem fs;
 
   private final ResourcePerspectives perspectives;
 
+  private final String encoding;
+
   private final CppHighlighter highlighter = new CppHighlighter();
 
-  public CppProjectSensor(FileSystem fs, ResourcePerspectives perspectives) {
+  private final CppSymbolizer symbolizer = new CppSymbolizer();
+
+  public CppProjectSensor(Settings settings, FileSystem fs, ResourcePerspectives perspectives) {
+    this.settings = settings;
     this.fs = fs;
     this.perspectives = perspectives;
-    highlighter.setEncoding(fs.encoding().name());
+    this.encoding = fs.encoding().name();
   }
 
   @Override
@@ -54,8 +71,19 @@ public class CppProjectSensor implements Sensor {
         fs.predicates().hasLanguage(CppLanguage.KEY),
         fs.predicates().hasType(Type.MAIN));
 
+    CppParserInfoProvider parserInfoProvider =
+        CppProjectAnalysisHandler.instance().getParserInfoProvider(module, settings);
+    CppIndexedParser parser = CppProjectAnalysisHandler.instance().getParser();
+    parser.setEncoding(encoding);
+    parser.setScanInfoProvider(parserInfoProvider);
+
+    highlighter.setEncoding(this.encoding);
+
     for (InputFile f : fs.inputFiles(pred)) {
+      log.info("Processing "+f);
       highlight(f);
+      IASTTranslationUnit tu = parser.parse(f.absolutePath());
+      symbolize(f, tu);
     }
   }
 
@@ -66,6 +94,10 @@ public class CppProjectSensor implements Sensor {
 
   private void highlight(InputFile f) {
     highlighter.highlight(f, perspectives.as(Highlightable.class, f));
+  }
+
+  private void symbolize(InputFile f, IASTTranslationUnit tu) {
+    symbolizer.symbolize(tu, perspectives.as(Symbolizable.class, f));
   }
 
 }
